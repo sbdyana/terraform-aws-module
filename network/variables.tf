@@ -27,10 +27,6 @@ variable "count_public_subnet" {
     type = string
 }
 
-variable "vpc_id" {
-    type = string
-}
-
 variable "public_subnets" {
   description = "A list of public subnets inside the VPC"
   type        = list(string)
@@ -75,22 +71,8 @@ variable "pub_route_tag" {
   type = string
 }
 
-variable "igw_id" {
-  type = string
-}
-
 variable "base_cidr_block" {
   type = string
-}
-
-
-variable "public_subnet" {
-  type = list
-}
-
-
-variable "private_subnet" {
-  type = list
 }
 
 variable "priv_route_tag" {
