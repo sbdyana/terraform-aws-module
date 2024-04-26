@@ -12,7 +12,7 @@ resource "aws_vpc" "sb_main_vpc" {
 
 resource "aws_subnet" "public_subnet" {
   count = var.count_public_subnet
-  vpc_id = var.vpc_id
+  vpc_id = aws_vpc.sb_main_vpc.id
   #cidr_block = element(concat(var.public_subnets), count.index)
   cidr_block = element(var.public_subnets, count.index)
   availability_zone = element(var.azs,count.index)
@@ -26,7 +26,7 @@ resource "aws_subnet" "public_subnet" {
 
 resource "aws_subnet" "private_subnet" {
   count = var.count_private_subnet
-  vpc_id = var.vpc_id
+  vpc_id = aws_vpc.sb_main_vpc.id
   #cidr_block = element(concat(var.public_subnets), count.index)
   cidr_block = element(var.private_subnets, count.index)
   availability_zone = element(var.azs,count.index)
@@ -39,11 +39,11 @@ resource "aws_subnet" "private_subnet" {
 
 
 resource "aws_route_table" "pub_route" {
-  vpc_id = var.vpc_id
+  vpc_id = aws_vpc.sb_main_vpc.id
 
   route {
     cidr_block = var.base_cidr_block
-    gateway_id = var.igw_id
+    gateway_id = aws_internet_gateway.igw.id
   }
 
   tags = {
@@ -55,17 +55,17 @@ resource "aws_route_table" "pub_route" {
 
 resource "aws_route_table_association" "route_table_association_public" {
   count = var.count_public_subnet
-  subnet_id = var.public_subnet[count.index]
+  subnet_id = aws_subnet.public_subnet[count.index].id
   route_table_id = aws_route_table.pub_route.id
 }
 
 #private
 resource "aws_route_table" "priv_route" {
-  vpc_id = var.vpc_id
+  vpc_id = aws_vpc.sb_main_vpc.id
 
   count = var.count_private_subnet
   route {
-    cidr_block = var.vpc_cidr_block
+    cidr_block = aws_vpc.sb_main_vpc.cidr_block
     gateway_id = "local"
   }
 
@@ -77,12 +77,12 @@ resource "aws_route_table" "priv_route" {
 
 resource "aws_route_table_association" "route_table_association_private" {
   count = var.count_private_subnet
-  subnet_id = var.private_subnet[count.index]
+  subnet_id = aws_subnet.private_subnet[count.index].id
   route_table_id = aws_route_table.priv_route[count.index].id
 }
 
 resource "aws_internet_gateway" "igw" {
-  vpc_id = var.vpc_id
+  vpc_id = aws_vpc.sb_main_vpc.id
 
   tags = {
     Name = var.igw_tag,
